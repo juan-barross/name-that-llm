@@ -1,0 +1,19 @@
+[project]
+name = "name-that-llm"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["numpy", "pandas", "pyarrow", "scikit-learn>=1.6", "scipy"]
+
+[dependency-groups]
+dev = ["pytest", "ruff"]
+
+[tool.ruff]
+line-length = 110
+src = ["src", "scripts", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+addopts = "-q"
