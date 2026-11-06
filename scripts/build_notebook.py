@@ -13,6 +13,7 @@ MODULES = [
     "features",
     "models",
     "predict",
+    "blend",
     "validation",
     "submission",
 ]
