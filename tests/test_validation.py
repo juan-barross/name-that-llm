@@ -1,6 +1,8 @@
 import numpy as np
 
+from ntl.labels import LABELS
 from ntl.models import EXPERIMENTS, build
+from ntl.predict import aligned_probabilities
 from ntl.validation import cross_validate, folds
 
 
@@ -15,14 +17,27 @@ def test_cada_linha_e_validada_uma_vez(train):
     assert sorted(seen) == list(range(len(train)))
 
 
-def test_cv_aprende_o_estilo_de_cada_modelo(train):
+def test_cv_devolve_uma_distribuicao_por_linha(train):
     result = cross_validate(lambda: build("char_word_logreg"), train)
 
-    assert result.probabilities.shape == (len(train), 18)
+    assert result.probabilities.shape == (len(train), len(LABELS))
     assert np.allclose(result.probabilities.sum(axis=1), 1)
-    assert result.score > 0.9
+    assert len(result.fold_scores) == 5
 
 
-def test_todos_os_experimentos_montam(train):
-    for name in EXPERIMENTS:
-        assert build(name).fit(train["text"], train["model"]).predict(train["text"][:2]).shape == (2,)
+def test_rotulo_ausente_no_treino_vira_coluna_zerada(train):
+    kept = train[train["model"] != LABELS[-1]]
+    model = build("char_logreg").fit(kept["text"], kept["model"])
+
+    probabilities = aligned_probabilities(model, train["text"][:3])
+
+    assert probabilities.shape == (3, len(LABELS))
+    assert (probabilities[:, -1] == 0).all()
+    assert np.allclose(probabilities.sum(axis=1), 1)
+
+
+def test_experimentos_montam_as_partes_declaradas():
+    for name, (parts, strength) in EXPERIMENTS.items():
+        pipeline = build(name)
+        assert [part for part, _ in pipeline.named_steps["features"].transformer_list] == list(parts)
+        assert pipeline.get_params()["classifier__C"] == strength

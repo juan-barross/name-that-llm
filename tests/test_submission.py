@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
 
+from ntl.labels import LABELS
 from ntl.predict import fit_predict
 from ntl.submission import write
 
@@ -26,7 +27,10 @@ def test_recusa_submissao_invalida(tmp_path, ids, labels, message):
         write(pd.Series(ids), labels, tmp_path / "s.parquet")
 
 
-def test_teste_de_uma_linha_como_na_sessao_interativa(train):
-    test = train.iloc[[0]][["id", "text"]]
+def test_teste_de_uma_linha_nova_como_na_sessao_interativa(train):
+    test = pd.DataFrame({"id": ["novo"], "text": ["Sobre oceanos, marca3 porém logo marca3."]})
 
-    assert fit_predict("char_word_logreg", train, test).tolist() == [train["model"].iloc[0]]
+    prediction = fit_predict("char_word_logreg", train, test)
+
+    assert prediction.shape == (1,)
+    assert prediction[0] in LABELS

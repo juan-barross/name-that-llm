@@ -4,15 +4,16 @@ import time
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
 from ntl.data import load
 from ntl.models import EXPERIMENTS, build
 from ntl.validation import cross_validate
 
-RUNS = Path("runs")
+RUNS = Path(__file__).resolve().parents[1] / "runs"
 
 
-def run(name: str, train) -> dict:
+def run(name: str, train: pd.DataFrame) -> dict[str, float | str]:
     start = time.perf_counter()
     result = cross_validate(lambda: build(name), train)
     np.save(RUNS / f"oof_{name}.npy", result.probabilities)

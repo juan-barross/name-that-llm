@@ -8,6 +8,7 @@ from sklearn.model_selection import GroupKFold
 from sklearn.pipeline import Pipeline
 
 from ntl.labels import LABELS
+from ntl.predict import aligned_probabilities, decode
 
 SEED = 2027
 N_SPLITS = 5
@@ -16,7 +17,7 @@ N_SPLITS = 5
 @dataclass(frozen=True)
 class CrossValidation:
     probabilities: np.ndarray
-    fold_scores: list[float]
+    fold_scores: tuple[float, ...]
 
     @property
     def score(self) -> float:
@@ -28,17 +29,12 @@ def folds(groups: pd.Series, n_splits: int = N_SPLITS) -> list[tuple[np.ndarray,
     return list(splitter.split(groups, groups=groups))
 
 
-def aligned_probabilities(model: Pipeline, texts: pd.Series) -> np.ndarray:
-    columns = [list(model.classes_).index(label) for label in LABELS]
-    return model.predict_proba(texts)[:, columns]
-
-
 def cross_validate(build: Callable[[], Pipeline], train: pd.DataFrame) -> CrossValidation:
     probabilities = np.zeros((len(train), len(LABELS)))
     scores = []
     for fit_index, valid_index in folds(train["prompt_id"]):
-        model = build().fit(train["text"].iloc[fit_index], train["model"].iloc[fit_index])
-        probabilities[valid_index] = aligned_probabilities(model, train["text"].iloc[valid_index])
-        predicted = np.array(LABELS)[probabilities[valid_index].argmax(axis=1)]
-        scores.append(balanced_accuracy_score(train["model"].iloc[valid_index], predicted))
-    return CrossValidation(probabilities, scores)
+        fit, valid = train.iloc[fit_index], train.iloc[valid_index]
+        model = build().fit(fit["text"], fit["model"])
+        probabilities[valid_index] = aligned_probabilities(model, valid["text"])
+        scores.append(balanced_accuracy_score(valid["model"], decode(probabilities[valid_index])))
+    return CrossValidation(probabilities, tuple(scores))
