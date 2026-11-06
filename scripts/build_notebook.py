@@ -4,7 +4,18 @@ import uuid
 from pathlib import Path
 
 PACKAGE = Path("src/ntl")
-MODULES = ["__init__", "labels", "data", "pool", "features", "models", "predict", "validation", "submission"]
+MODULES = [
+    "__init__",
+    "labels",
+    "data",
+    "pool",
+    "prior",
+    "features",
+    "models",
+    "predict",
+    "validation",
+    "submission",
+]
 MAIN = """from ntl.data import load
 from ntl.predict import fit_predict
 from ntl.submission import write
