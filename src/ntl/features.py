@@ -2,7 +2,7 @@ import re
 from collections.abc import Iterable
 
 import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import HashingVectorizer, TfidfTransformer, TfidfVectorizer
 from sklearn.pipeline import FeatureUnion, Pipeline, make_pipeline
 from sklearn.preprocessing import FunctionTransformer, StandardScaler
 
@@ -64,11 +64,35 @@ def word_tfidf() -> TfidfVectorizer:
     )
 
 
+def char15_tfidf() -> TfidfVectorizer:
+    return TfidfVectorizer(
+        analyzer="char", ngram_range=(1, 5), min_df=3, sublinear_tf=True, lowercase=False, dtype=np.float32
+    )
+
+
+def char_hashing() -> Pipeline:
+    hashing = HashingVectorizer(
+        analyzer="char",
+        ngram_range=(1, 5),
+        n_features=2**20,
+        alternate_sign=False,
+        norm=None,
+        lowercase=False,
+    )
+    return make_pipeline(hashing, TfidfTransformer(sublinear_tf=True))
+
+
 def scaled_style() -> Pipeline:
     return make_pipeline(FunctionTransformer(style_matrix), StandardScaler())
 
 
-BUILDERS = {"char": char_tfidf, "word": word_tfidf, "style": scaled_style}
+BUILDERS = {
+    "char": char_tfidf,
+    "char15": char15_tfidf,
+    "hash": char_hashing,
+    "word": word_tfidf,
+    "style": scaled_style,
+}
 
 
 def vectorizer(*parts: str) -> FeatureUnion:

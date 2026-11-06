@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from ntl.data import load
-from ntl.models import EXPERIMENTS, build
+from ntl.models import EXPERIMENTS
 from ntl.validation import cross_validate
 
 RUNS = Path(__file__).resolve().parents[1] / "runs"
@@ -15,7 +15,7 @@ RUNS = Path(__file__).resolve().parents[1] / "runs"
 
 def run(name: str, train: pd.DataFrame) -> dict[str, float | str]:
     start = time.perf_counter()
-    result = cross_validate(lambda: build(name), train)
+    result = cross_validate(name, train)
     np.save(RUNS / f"oof_{name}.npy", result.probabilities)
     return {
         "experimento": name,

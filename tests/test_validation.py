@@ -18,7 +18,7 @@ def test_cada_linha_e_validada_uma_vez(train):
 
 
 def test_cv_devolve_uma_distribuicao_por_linha(train):
-    result = cross_validate(lambda: build("char_word_logreg"), train)
+    result = cross_validate("char_word_logreg", train)
 
     assert result.probabilities.shape == (len(train), len(LABELS))
     assert np.allclose(result.probabilities.sum(axis=1), 1)
@@ -37,7 +37,10 @@ def test_rotulo_ausente_no_treino_vira_coluna_zerada(train):
 
 
 def test_experimentos_montam_as_partes_declaradas():
-    for name, (parts, strength) in EXPERIMENTS.items():
+    for name, experiment in EXPERIMENTS.items():
         pipeline = build(name)
-        assert [part for part, _ in pipeline.named_steps["features"].transformer_list] == list(parts)
-        assert pipeline.get_params()["classifier__C"] == strength
+        assert [part for part, _ in pipeline.named_steps["features"].transformer_list] == list(
+            experiment.parts
+        )
+        strength = "alpha" if experiment.classifier == "sgd" else "C"
+        assert pipeline.get_params()[f"classifier__{strength}"] == experiment.strength

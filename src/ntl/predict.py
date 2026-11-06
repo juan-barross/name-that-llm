@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.pipeline import Pipeline
 
 from ntl.labels import LABELS
-from ntl.models import build
+from ntl.models import fit
 
 INDEX = {label: i for i, label in enumerate(LABELS)}
 
@@ -22,5 +22,4 @@ def decode(probabilities: np.ndarray) -> np.ndarray:
 
 
 def fit_predict(experiment: str, train: pd.DataFrame, test: pd.DataFrame) -> np.ndarray:
-    model = build(experiment).fit(train["text"], train["model"])
-    return decode(aligned_probabilities(model, test["text"]))
+    return decode(aligned_probabilities(fit(experiment, train), test["text"]))
