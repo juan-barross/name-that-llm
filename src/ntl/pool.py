@@ -1,6 +1,7 @@
 from functools import cache
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 
@@ -31,11 +32,9 @@ def clean(pool: pd.DataFrame) -> pd.DataFrame:
 
 
 def sample(pool: pd.DataFrame, per_label: int, seed: int = SEED) -> pd.DataFrame:
-    groups = [
-        group.sample(n=min(per_label, len(group)), weights=group["match_weight"], random_state=seed)
-        for _, group in pool.groupby("model")
-    ]
-    return pd.concat(groups, ignore_index=True)
+    keys = np.random.default_rng(seed).random(len(pool)) ** (1 / pool["match_weight"].to_numpy())
+    ranked = pool.assign(sample_key=keys).sort_values("sample_key", ascending=False)
+    return ranked.groupby("model").head(per_label).drop(columns="sample_key").reset_index(drop=True)
 
 
 @cache

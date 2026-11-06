@@ -59,3 +59,14 @@ def test_pool_nunca_entra_na_validacao(train, with_pool):
     result = cross_validate("pool_test", train)
 
     assert result.probabilities.shape[0] == len(train)
+
+
+def test_amostra_com_pesos_muito_concentrados_nao_quebra():
+    pool = pd.concat([raw_pool()] * 6, ignore_index=True)
+    pool["text"] = [f"t{i}" for i in range(6)]
+    pool["match_weight"] = [1e6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6]
+
+    picked = sample(pool, 3)
+
+    assert len(picked) == 3
+    assert "t0" in picked["text"].tolist()
