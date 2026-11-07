@@ -15,10 +15,17 @@ def test_notebook_leva_todos_os_modulos_do_pacote():
 
 def test_codigo_do_notebook_compila(monkeypatch):
     monkeypatch.chdir(ROOT)
-    cells = build_notebook.notebook("char_word_logreg", "# intro")["cells"]
+    cells = build_notebook.notebook({"char_logreg": 1.0, "hash_sgd": 0.4}, 0.3, "# intro")["cells"]
 
     for cell in cells[1:]:
         source = "".join(cell["source"])
         body = source.split("\n", 1)[1] if source.startswith("%%writefile") else source
         compile(body, "celula", "exec")
-    assert 'EXPERIMENT = "char_word_logreg"' in "".join(cells[-1]["source"])
+    main = "".join(cells[-1]["source"])
+    assert "BLEND = {'char_logreg': 1.0, 'hash_sgd': 0.4}" in main
+    assert "BALANCE = 0.3" in main
+
+
+def test_membro_sem_peso_vale_um():
+    assert build_notebook.parse_member("hash_sgd_pool") == ("hash_sgd_pool", 1.0)
+    assert build_notebook.parse_member("char_logreg=0.4") == ("char_logreg", 0.4)

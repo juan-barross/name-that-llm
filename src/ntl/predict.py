@@ -2,8 +2,9 @@ import numpy as np
 import pandas as pd
 from sklearn.pipeline import Pipeline
 
-from ntl.labels import LABELS
-from ntl.models import EXPERIMENTS, fit
+from ntl.blend import geometric_blend
+from ntl.labels import LABELS, decode
+from ntl.models import fit
 from ntl.prior import soft_balance
 
 INDEX = {label: i for i, label in enumerate(LABELS)}
@@ -18,10 +19,8 @@ def aligned_probabilities(model: Pipeline, texts: pd.Series) -> np.ndarray:
     return probabilities
 
 
-def decode(probabilities: np.ndarray) -> np.ndarray:
-    return np.array(LABELS)[probabilities.argmax(axis=1)]
-
-
-def fit_predict(experiment: str, train: pd.DataFrame, test: pd.DataFrame) -> np.ndarray:
-    probabilities = aligned_probabilities(fit(experiment, train), test["text"])
-    return decode(soft_balance(probabilities, EXPERIMENTS[experiment].balance))
+def fit_predict(
+    blend: dict[str, float], train: pd.DataFrame, test: pd.DataFrame, balance: float
+) -> np.ndarray:
+    members = [aligned_probabilities(fit(name, train), test["text"]) for name in blend]
+    return decode(soft_balance(geometric_blend(members, list(blend.values())), balance))

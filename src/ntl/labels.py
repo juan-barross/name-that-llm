@@ -1,3 +1,5 @@
+import numpy as np
+
 LABELS = (
     "gpt-5.5",
     "gpt-5.6-luna",
@@ -18,3 +20,7 @@ LABELS = (
     "glm-5.3-flash",
     "kimi-k3",
 )
+
+
+def decode(probabilities: np.ndarray) -> np.ndarray:
+    return np.array(LABELS)[probabilities.argmax(axis=1)]

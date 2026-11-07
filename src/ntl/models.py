@@ -17,7 +17,6 @@ class Experiment:
     strength: float = 3.0
     pool_per_label: int = 0
     pool_weight: float = 0.85
-    balance: float = 0.0
 
 
 EXPERIMENTS = {

@@ -30,7 +30,7 @@ def test_recusa_submissao_invalida(tmp_path, ids, labels, message):
 def test_teste_de_uma_linha_nova_como_na_sessao_interativa(train):
     test = pd.DataFrame({"id": ["novo"], "text": ["Sobre oceanos, marca3 porém logo marca3."]})
 
-    prediction = fit_predict("char_word_logreg", train, test)
+    prediction = fit_predict({"char_logreg": 1.0, "char_word_logreg": 0.5}, train, test, balance=0.3)
 
     assert prediction.shape == (1,)
     assert prediction[0] in LABELS

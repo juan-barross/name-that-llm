@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.metrics import balanced_accuracy_score
 
 from ntl.data import load
-from ntl.predict import decode
+from ntl.labels import decode
 from ntl.prior import soft_balance
 
 RUNS = Path(__file__).resolve().parents[1] / "runs"

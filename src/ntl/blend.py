@@ -3,7 +3,7 @@ from collections.abc import Sequence
 import numpy as np
 from sklearn.metrics import balanced_accuracy_score
 
-from ntl.predict import decode
+from ntl.labels import decode
 from ntl.prior import normalize_rows
 
 GRID = tuple(np.round(np.linspace(0.1, 1.0, 10), 2))

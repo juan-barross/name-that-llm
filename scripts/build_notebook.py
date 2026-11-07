@@ -21,10 +21,11 @@ MAIN = """from ntl.data import load
 from ntl.predict import fit_predict
 from ntl.submission import write
 
-EXPERIMENT = "{experiment}"
+BLEND = {blend}
+BALANCE = {balance}
 
 train, test = load("train"), load("test")
-submission = write(test["id"], fit_predict(EXPERIMENT, train, test))
+submission = write(test["id"], fit_predict(BLEND, train, test, BALANCE))
 submission["model"].value_counts()"""
 
 
@@ -42,12 +43,18 @@ def module_cell(name: str) -> dict:
     return cell("code", f"%%writefile ntl/{name}.py\n" + (PACKAGE / f"{name}.py").read_text(encoding="utf-8"))
 
 
-def notebook(experiment: str, intro: str) -> dict:
+def parse_member(text: str) -> tuple[str, float]:
+    name, _, weight = text.partition("=")
+    return name, float(weight or 1.0)
+
+
+def notebook(blend: dict[str, float], balance: float, intro: str) -> dict:
+    main = MAIN.replace("{blend}", repr(blend)).replace("{balance}", repr(balance))
     cells = [
         cell("markdown", intro),
         cell("code", 'from pathlib import Path\n\nPath("ntl").mkdir(exist_ok=True)'),
         *[module_cell(name) for name in MODULES],
-        cell("code", MAIN.replace("{experiment}", experiment)),
+        cell("code", main),
     ]
     return {
         "cells": cells,
@@ -61,11 +68,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Monta o notebook de submissão do Kaggle a partir de src/ntl"
     )
-    parser.add_argument("experimento")
+    parser.add_argument("membros", nargs="+", type=parse_member, help="experimento=peso")
+    parser.add_argument("--balanco", type=float, default=0.3)
     parser.add_argument("--saida", type=Path, default=Path("kaggle/submissao.ipynb"))
     parser.add_argument("--intro", type=Path, default=Path("kaggle/intro.md"))
     args = parser.parse_args()
-    content = notebook(args.experimento, args.intro.read_text(encoding="utf-8"))
+    content = notebook(dict(args.membros), args.balanco, args.intro.read_text(encoding="utf-8"))
     args.saida.write_text(json.dumps(content, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
 

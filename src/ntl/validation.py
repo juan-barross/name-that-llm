@@ -5,9 +5,9 @@ import pandas as pd
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.model_selection import GroupKFold
 
-from ntl.labels import LABELS
+from ntl.labels import LABELS, decode
 from ntl.models import fit
-from ntl.predict import aligned_probabilities, decode
+from ntl.predict import aligned_probabilities
 
 SEED = 2027
 N_SPLITS = 5
