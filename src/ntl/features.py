@@ -26,6 +26,31 @@ MARKS = {
 STATS = ("log_words", "mean_word_length", "mean_sentence_words", "std_sentence_words", "uppercase_rate")
 PATTERNS = {name: re.compile(pattern) for name, pattern in MARKS.items()}
 SENTENCE = re.compile(r"(?<=[.!?])\s+")
+LETTERS = re.compile(r"[^\W\d_]+")
+TOKENS = re.compile(r"\w+|[^\w\s]")
+FUNCTION_TEXT = """
+    a about above after again against all also although am an and any are as at be because been before
+    being below between both but by can could did do does doing down during each either even every few for
+    from further had has have having he her here hers him his how however i if in into is it its itself just
+    may me might more most must my neither no nor not now of off on once only or other our ours out over own
+    perhaps rather same shall she should so some such than that the their theirs them then there therefore
+    these they this those though through thus to too under until up upon us very was we were what when where
+    whether which while who whom whose why will with within without would yet you your yours
+"""
+FUNCTION_WORDS = frozenset(FUNCTION_TEXT.split())
+
+
+def word_shape(text: str) -> str:
+    return LETTERS.sub(lambda match: "X" if match[0][0].isupper() else "x", text)
+
+
+def skeleton_token(token: str) -> str:
+    word = token.lower()
+    return word if word in FUNCTION_WORDS or not token.isalnum() else "CONTENT"
+
+
+def function_skeleton(text: str) -> str:
+    return " ".join(skeleton_token(token) for token in TOKENS.findall(text))
 
 
 def text_style(text: str) -> list[float]:
@@ -82,6 +107,31 @@ def char_hashing() -> Pipeline:
     return make_pipeline(hashing, TfidfTransformer(sublinear_tf=True))
 
 
+def shape_tfidf() -> TfidfVectorizer:
+    return TfidfVectorizer(
+        preprocessor=word_shape,
+        analyzer="char",
+        ngram_range=(2, 6),
+        min_df=2,
+        sublinear_tf=True,
+        lowercase=False,
+        dtype=np.float32,
+    )
+
+
+def function_tfidf() -> TfidfVectorizer:
+    return TfidfVectorizer(
+        preprocessor=function_skeleton,
+        analyzer="word",
+        ngram_range=(1, 3),
+        min_df=2,
+        sublinear_tf=True,
+        lowercase=False,
+        token_pattern=r"\S+",
+        dtype=np.float32,
+    )
+
+
 def scaled_style() -> Pipeline:
     return make_pipeline(FunctionTransformer(style_matrix), StandardScaler())
 
@@ -91,6 +141,8 @@ BUILDERS = {
     "char15": char15_tfidf,
     "hash": char_hashing,
     "word": word_tfidf,
+    "shape": shape_tfidf,
+    "function": function_tfidf,
     "style": scaled_style,
 }
 

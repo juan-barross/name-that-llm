@@ -24,6 +24,8 @@ EXPERIMENTS = {
     "char_word_logreg": Experiment(("char", "word")),
     "char_word_style_logreg": Experiment(("char", "word", "style")),
     "char15_word_logreg": Experiment(("char15", "word"), strength=10.0),
+    "shape_function_logreg": Experiment(("shape", "function")),
+    "char_word_shape_function_logreg": Experiment(("char", "word", "shape", "function")),
     "hash_sgd": Experiment(("hash",), "sgd", 2e-5),
     "hash_sgd_pool300": Experiment(("hash",), "sgd", 2e-5, pool_per_label=300),
     "hash_sgd_pool": Experiment(("hash",), "sgd", 2e-5, pool_per_label=2500),

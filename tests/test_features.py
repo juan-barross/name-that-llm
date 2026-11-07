@@ -1,6 +1,6 @@
 import numpy as np
 
-from ntl.features import MARKS, STATS, style_matrix, text_style, vectorizer
+from ntl.features import MARKS, STATS, function_skeleton, style_matrix, text_style, vectorizer, word_shape
 
 
 def named_style(text: str) -> dict[str, float]:
@@ -23,6 +23,21 @@ def test_texto_vazio_nao_quebra():
 
 def test_uma_linha_por_texto_e_uma_coluna_por_marca():
     assert style_matrix(["um texto.", "outro texto!"]).shape == (2, len(MARKS) + len(STATS))
+
+
+def test_forma_troca_palavras_por_maiuscula_ou_minuscula():
+    assert word_shape("Hello world, 42 times!") == "X x, 42 x!"
+
+
+def test_esqueleto_guarda_palavras_funcionais_e_pontuacao():
+    assert function_skeleton("The cat sat on the mat.") == "the CONTENT CONTENT on the CONTENT ."
+
+
+def test_visoes_de_estilo_ignoram_o_assunto():
+    texts = ["The ocean is deep, and it is cold.", "The desert is dry, and it is hot."]
+    shape = vectorizer("shape", "function").fit_transform(texts)
+
+    assert (shape[0] != shape[1]).nnz == 0
 
 
 def test_partes_do_vetorizador_seguem_o_pedido():
