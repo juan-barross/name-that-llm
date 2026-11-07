@@ -42,3 +42,26 @@ def test_codigo_do_notebook_compila(monkeypatch):
 def test_membro_sem_peso_vale_um():
     assert build_notebook.parse_member("hash_sgd_pool") == ("hash_sgd_pool", 1.0)
     assert build_notebook.parse_member("char_logreg=0.4") == ("char_logreg", 0.4)
+
+
+llm_spec = importlib.util.spec_from_file_location(
+    "build_llm_notebook", ROOT / "scripts" / "build_llm_notebook.py"
+)
+build_llm_notebook = importlib.util.module_from_spec(llm_spec)
+llm_spec.loader.exec_module(build_llm_notebook)
+
+
+def test_notebook_da_rodada_a_leva_os_modulos_do_llm(monkeypatch):
+    monkeypatch.chdir(ROOT)
+    cells = build_llm_notebook.notebook("# intro")["cells"]
+    sources = ["".join(c["source"]) for c in cells]
+
+    assert any(s.startswith("%%writefile ntl/llm.py") for s in sources)
+    assert any(s.startswith("%%writefile ntl/llm_data.py") for s in sources)
+    assert "SMOKE = False" in sources[-1]
+    for source in sources[1:]:
+        body = source.split("\n", 1)[1] if source.startswith("%%writefile") else source
+        if not source.startswith(("!", "%%writefile")):
+            compile(body, "celula", "exec")
+        if source.startswith("%%writefile"):
+            assert body.strip()
