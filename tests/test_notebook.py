@@ -10,7 +10,17 @@ spec.loader.exec_module(build_notebook)
 def test_notebook_leva_todos_os_modulos_do_pacote():
     package = {path.stem for path in (ROOT / "src" / "ntl").glob("*.py")}
 
-    assert set(build_notebook.MODULES) == package
+    assert {*build_notebook.MODULES, "__init__"} == package
+
+
+def test_nenhuma_celula_writefile_fica_vazia(monkeypatch):
+    monkeypatch.chdir(ROOT)
+    cells = build_notebook.notebook({"char_logreg": 1.0}, 0.3, "# intro")["cells"]
+
+    for cell in cells:
+        source = "".join(cell["source"])
+        if source.startswith("%%writefile"):
+            assert source.split("\n", 1)[1].strip()
 
 
 def test_codigo_do_notebook_compila(monkeypatch):

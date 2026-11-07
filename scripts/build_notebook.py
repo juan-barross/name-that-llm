@@ -5,7 +5,6 @@ from pathlib import Path
 
 PACKAGE = Path("src/ntl")
 MODULES = [
-    "__init__",
     "labels",
     "data",
     "pool",
@@ -17,6 +16,10 @@ MODULES = [
     "validation",
     "submission",
 ]
+SETUP = """from pathlib import Path
+
+Path("ntl").mkdir(exist_ok=True)
+Path("ntl/__init__.py").touch()"""
 MAIN = """from ntl.data import load
 from ntl.predict import fit_predict
 from ntl.submission import write
@@ -52,7 +55,7 @@ def notebook(blend: dict[str, float], balance: float, intro: str) -> dict:
     main = MAIN.replace("{blend}", repr(blend)).replace("{balance}", repr(balance))
     cells = [
         cell("markdown", intro),
-        cell("code", 'from pathlib import Path\n\nPath("ntl").mkdir(exist_ok=True)'),
+        cell("code", SETUP),
         *[module_cell(name) for name in MODULES],
         cell("code", main),
     ]
