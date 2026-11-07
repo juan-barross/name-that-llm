@@ -7,10 +7,13 @@ build_notebook = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(build_notebook)
 
 
+LLM_MODULES = {"llm", "llm_data"}
+
+
 def test_notebook_leva_todos_os_modulos_do_pacote():
     package = {path.stem for path in (ROOT / "src" / "ntl").glob("*.py")}
 
-    assert {*build_notebook.MODULES, "__init__"} == package
+    assert {*build_notebook.MODULES, "__init__"} == package - LLM_MODULES
 
 
 def test_nenhuma_celula_writefile_fica_vazia(monkeypatch):
