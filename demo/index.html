@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Name That LLM</title>
+    <meta name="description" content="Descubra qual de 18 LLMs escreveu um texto, com o modelo rodando no seu navegador." />
+    <link rel="stylesheet" href="estilo.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Competição Kaggle · Name That LLM</p>
+        <h1>Qual LLM escreveu este texto?</h1>
+        <p class="lead">
+          Cole um texto em inglês, de preferência entre 50 e 300 palavras. O modelo compara o estilo com o de 18 LLMs
+          (GPT, Gemini, Claude, Qwen, GLM e Kimi) e mostra as marcas que mais pesaram. Tudo roda no seu navegador:
+          o texto não sai daqui.
+        </p>
+      </header>
+
+      <form id="form">
+        <label for="texto">Texto</label>
+        <textarea id="texto" rows="10" placeholder="Paste a passage written by an LLM here..." required></textarea>
+        <div class="actions">
+          <button id="botao" type="submit" disabled>Carregando o modelo…</button>
+          <span id="contagem" class="muted">0 palavras</span>
+        </div>
+      </form>
+
+      <section id="resultado" hidden>
+        <h2>Modelos mais prováveis</h2>
+        <ol id="barras" class="bars"></ol>
+        <h2>Marcas que mais pesaram</h2>
+        <p class="muted">Trechos do texto que mais empurraram a resposta para o modelo escolhido.</p>
+        <ul id="marcas" class="marks"></ul>
+      </section>
+
+      <section class="about">
+        <h2>Como funciona</h2>
+        <p>
+          Quatro visões do texto viram atributos TF-IDF: n-gramas de caracteres, palavras, a forma das palavras (cada
+          palavra vira <code>X</code> ou <code>x</code>) e o esqueleto de palavras funcionais (o conteúdo vira
+          <code>CONTENT</code>). Uma regressão logística decide entre os 18 modelos. Os pesos foram exportados do
+          Python para int8, e um teste garante que o JavaScript dá as mesmas probabilidades.
+        </p>
+        <p>
+          Esta é a versão compacta, com 30 mil termos por visão, para carregar rápido. A solução completa, um blend
+          treinado com o Open Pool, fez 0,413 na validação por prompt e 0,415 no placar público.
+        </p>
+        <p class="links">
+          <a href="https://github.com/juan-barross/name-that-llm">Código no GitHub</a>
+          <a href="https://www.kaggle.com/competitions/name-that-llm">Competição no Kaggle</a>
+        </p>
+      </section>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

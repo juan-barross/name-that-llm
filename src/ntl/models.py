@@ -17,6 +17,7 @@ class Experiment:
     strength: float = 3.0
     pool_per_label: int = 0
     pool_weight: float = 0.85
+    vocabulary: int | None = None
 
 
 EXPERIMENTS = {
@@ -26,6 +27,7 @@ EXPERIMENTS = {
     "char15_word_logreg": Experiment(("char15", "word"), strength=10.0),
     "shape_function_logreg": Experiment(("shape", "function")),
     "char_word_shape_function_logreg": Experiment(("char", "word", "shape", "function")),
+    "demo_30k": Experiment(("char", "word", "shape", "function"), vocabulary=30_000),
     "hash_sgd": Experiment(("hash",), "sgd", 2e-5),
     "hash_sgd_pool300": Experiment(("hash",), "sgd", 2e-5, pool_per_label=300),
     "hash_sgd_pool": Experiment(("hash",), "sgd", 2e-5, pool_per_label=2500),
@@ -46,7 +48,8 @@ def classifier(experiment: Experiment) -> LogisticRegression | SGDClassifier:
 
 def build(name: str) -> Pipeline:
     experiment = EXPERIMENTS[name]
-    return Pipeline([("features", vectorizer(*experiment.parts)), ("classifier", classifier(experiment))])
+    features = vectorizer(*experiment.parts, vocabulary=experiment.vocabulary)
+    return Pipeline([("features", features), ("classifier", classifier(experiment))])
 
 
 def training_frame(name: str, train: pd.DataFrame) -> pd.DataFrame:

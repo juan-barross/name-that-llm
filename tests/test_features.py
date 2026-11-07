@@ -40,5 +40,12 @@ def test_visoes_de_estilo_ignoram_o_assunto():
     assert (shape[0] != shape[1]).nnz == 0
 
 
+def test_vocabulario_limitado_vale_para_cada_visao():
+    texts = ["The ocean is deep, and it is cold.", "A desert is dry; it is hot!", "Rivers run fast."]
+    features = vectorizer("char", "shape", vocabulary=10).fit(texts * 3)
+
+    assert all(len(step.vocabulary_) == 10 for _, step in features.transformer_list)
+
+
 def test_partes_do_vetorizador_seguem_o_pedido():
     assert [name for name, _ in vectorizer("char", "style").transformer_list] == ["char", "style"]

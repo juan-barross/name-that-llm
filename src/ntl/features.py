@@ -147,5 +147,9 @@ BUILDERS = {
 }
 
 
-def vectorizer(*parts: str) -> FeatureUnion:
-    return FeatureUnion([(part, BUILDERS[part]()) for part in parts])
+def vectorizer(*parts: str, vocabulary: int | None = None) -> FeatureUnion:
+    union = FeatureUnion([(part, BUILDERS[part]()) for part in parts])
+    for _, step in union.transformer_list:
+        if isinstance(step, TfidfVectorizer):
+            step.set_params(max_features=vocabulary)
+    return union
