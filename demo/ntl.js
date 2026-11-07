@@ -4,6 +4,10 @@ const TOKENS = /[\p{L}\p{N}_]+|[^\p{L}\p{N}_\s]/gu;
 const ALNUM = /^[\p{L}\p{N}]+$/u;
 const NON_SPACE = /\S+/gu;
 const EVIDENCE_PER_VIEW = 3;
+const WORDS = /[\p{L}\p{N}_]+/gu;
+const ENGLISH_MARKERS = new Set(
+  "the and of to is that it with for this are was be from which by have not or its their".split(" "),
+);
 
 function isUpper(character) {
   return character !== character.toLowerCase() && character === character.toUpperCase();
@@ -126,7 +130,12 @@ export function createModel(spec, weightBuffer) {
     const evidence = views
       .flatMap((view) => ranked.filter((mark) => mark.view === view.nome).slice(0, EVIDENCE_PER_VIEW))
       .sort((a, b) => b.weight - a.weight);
-    return { labels: spec.rotulos, probabilities, best, evidence };
+    return { labels: spec.rotulos, probabilities, best, evidence, englishShare: englishShare(text) };
+  }
+
+  function englishShare(text) {
+    const words = text.toLowerCase().match(WORDS) ?? [];
+    return words.length ? words.filter((word) => ENGLISH_MARKERS.has(word)).length / words.length : 0;
   }
 
   return { predict };

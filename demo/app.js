@@ -2,6 +2,7 @@ import { loadModel } from "./ntl.js";
 
 const VIEWS = { char: "caracteres", word: "palavras", shape: "forma", function: "funcionais" };
 const TOP = 5;
+const ENGLISH_MIN = 0.02;
 
 const form = document.querySelector("#form");
 const input = document.querySelector("#texto");
@@ -11,6 +12,7 @@ const result = document.querySelector("#resultado");
 const bars = document.querySelector("#barras");
 const marks = document.querySelector("#marcas");
 const summary = document.querySelector("#resumo");
+const warning = document.querySelector("#aviso");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const percent = (probability) => `${(probability * 100).toFixed(1).replace(".", ",")}%`;
 
@@ -66,6 +68,7 @@ loadModel("modelo")
       const prediction = model.predict(input.value);
       renderBars(prediction);
       renderMarks(prediction);
+      warning.hidden = prediction.englishShare >= ENGLISH_MIN;
       result.hidden = false;
       result.scrollIntoView({ behavior: reducedMotion.matches ? "auto" : "smooth", block: "start" });
     });

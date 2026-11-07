@@ -292,3 +292,11 @@ a:hover {
     transition: none !important;
   }
 }
+
+.warning {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-card);
+  border-radius: 6px;
+}
