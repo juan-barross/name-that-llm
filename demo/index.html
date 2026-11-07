@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Name That LLM</title>
     <meta name="description" content="Descubra qual de 18 LLMs escreveu um texto, com o modelo rodando no seu navegador." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap"
+    />
     <link rel="stylesheet" href="estilo.css" />
   </head>
   <body>
@@ -21,15 +27,22 @@
 
       <form id="form">
         <label for="texto">Texto</label>
-        <textarea id="texto" rows="10" placeholder="Paste a passage written by an LLM here..." required></textarea>
+        <textarea
+          id="texto"
+          rows="10"
+          placeholder="Paste a passage written by an LLM here..."
+          aria-describedby="contagem"
+          required
+        ></textarea>
         <div class="actions">
           <button id="botao" type="submit" disabled>Carregando o modelo…</button>
-          <span id="contagem" class="muted">0 palavras</span>
+          <span id="contagem" class="muted counter">0 palavras</span>
         </div>
       </form>
 
-      <section id="resultado" hidden>
-        <h2>Modelos mais prováveis</h2>
+      <section id="resultado" aria-labelledby="titulo-resultado" hidden>
+        <h2 id="titulo-resultado">Modelos mais prováveis</h2>
+        <p id="resumo" class="summary" role="status"></p>
         <ol id="barras" class="bars"></ol>
         <h2>Marcas que mais pesaram</h2>
         <p class="muted">Trechos do texto que mais empurraram a resposta para o modelo escolhido.</p>

@@ -10,6 +10,9 @@ const counter = document.querySelector("#contagem");
 const result = document.querySelector("#resultado");
 const bars = document.querySelector("#barras");
 const marks = document.querySelector("#marcas");
+const summary = document.querySelector("#resumo");
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const percent = (probability) => `${(probability * 100).toFixed(1).replace(".", ",")}%`;
 
 const wordCount = (text) => (text.match(/\S+/gu) ?? []).length;
 const visible = (term) => term.replaceAll(" ", "·");
@@ -29,11 +32,14 @@ function renderBars({ labels, probabilities }) {
       const fill = item("span", "fill", "");
       fill.style.width = `${(probability * 100).toFixed(1)}%`;
       const track = item("span", "track", "");
+      track.setAttribute("aria-hidden", "true");
       track.append(fill);
-      row.append(item("span", "label", label), track, item("span", "value", `${(probability * 100).toFixed(1)}%`));
+      row.append(item("span", "label", label), track, item("span", "value", percent(probability)));
       return row;
     }),
   );
+  const [label, probability] = ranked[0];
+  summary.replaceChildren("Mais provável: ", item("strong", "", label), ` com ${percent(probability)}.`);
 }
 
 function renderMarks({ evidence }) {
@@ -61,7 +67,7 @@ loadModel("modelo")
       renderBars(prediction);
       renderMarks(prediction);
       result.hidden = false;
-      result.scrollIntoView({ behavior: "smooth", block: "start" });
+      result.scrollIntoView({ behavior: reducedMotion.matches ? "auto" : "smooth", block: "start" });
     });
   })
   .catch(() => {
